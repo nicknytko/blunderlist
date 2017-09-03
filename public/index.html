@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Blunderlist</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <style>
+         #top
+         {
+             position: absolute;
+             left: 0px;
+             top: 0px;
+             bottom: 0px;
+             width: 100%;
+             transition: width 0.5s;
+             overflow: clip;
+         }
+         #slide
+         {
+             position: fixed;
+             top: 0px;
+             bottom: 0px;
+             right: 0px;
+             width: 0%;
+             overflow: scroll;
+             padding-right: 5px;
+             padding-top: 10px;
+             transition: width 0.5s;
+         }
+        </style>
+    </head>
+    <body>
+        <div id="top">
+            <div class="container">
+                <br>
+                <h1>Blunderlist</h1><br>
+                <div class="input-group">
+                    <div class="input-group-addon">+</div>
+                    <input class="form-control" id="tasks_new" type="text" placeholder="Add an item">
+                </div>
+                <hr>
+                <div class="list-group" id="tasks_list"></div>
+            </div>
+        </div>
+        <div id="slide">
+            <div class="container">
+                <form>
+                    <button type="submit" class="btn btn-outline-primary" id="task_form_back_btn">Back</button><br><br>
+                <label>Type</label>
+                <select class="form-control" id="task_form_type">
+                    <option value="0">Event</option>
+                    <option value="1">Task</option>
+                </select>
+                <label>Title</label>
+                <input class="form-control" type="text" id="task_form_title">
+                <label>Class/Organization</label>
+                <input class="form-control" type="text" id="task_form_classorg">
+                <label>Location</label>
+                <input class="form-control" type="text" id="task_form_location">
+                <label id="task_form_label_duedate">Due Date</label>
+                <input class="form-control" type="text" id="task_form_duedate">
+                <label>Notes</label>
+                <textarea class="form-control" id="task_form_notes"></textarea>
+                <div id="task_form_section_reserve">
+                    <br>
+                        <label>RSVP</label>
+                        <input type="checkbox" id="task_form_reserve"><br>
+                    <label>Reserve By Date</label>
+                    <input class="form-control" type="text" id="task_form_reservedate">
+                    <label>Reservation Notes</label>
+                    <textarea class="form-control" id="task_form_reservenotes"></textarea>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-outline-primary" id="task_form_update_btn">Update</button>
+                <button type="button" class="btn btn-danger" id="task_form_delete_btn">Delete</button>
+            </form>
+            </div>
+        </div>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/api.js" ></script>
+        <script src="index.js"></script>
+    </body>
+</html>
