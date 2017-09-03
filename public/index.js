@@ -35,7 +35,15 @@ function reload_list( cb )
             }
         }
 
-        items.sort( ( a, b ) => { return a.date.valueOf( ) - b.date.valueOf( ); } );
+	console.log( items );
+	
+        items.sort( ( a, b ) =>
+		    {
+			let dateA = ( a && a.date ? a.date.valueOf( ) : 0 );
+			let dateB = ( b && b.date ? b.date.valueOf( ) : 0 );
+			
+			return dateA - dateB;
+		    } );
         
         for ( let i=0; i < items.length; i++ )
         {
@@ -55,7 +63,8 @@ function add_dom_event( label, date, id, parent )
                  date.toLocaleDateString( ) : "";
     let icon = ( events[id].event_type == 0 ? "calendar" : "file-text" );
 
-    if ( events[id].class_org.match( /cs/i ) )
+    if ( events[id].class_org &&
+	 events[id].class_org.match( /cs/i ) )
     {
         icon = "file-code";
     }

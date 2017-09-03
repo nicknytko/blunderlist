@@ -2,7 +2,10 @@ var express = require( "express" ),
     Sequelize = require( "sequelize" ),
     bodyParser = require( "body-parser" );
 var app = express( ),
-    port = process.env.PORT || 3000;
+    port = process.env.PORT || 3000,
+    router = express.Router( );
+
+const base_url = "/list";
 
 const sequelize = new Sequelize( "blunderlist-dev", null, null, { host: "localhost", dialect: "sqlite", storage: "db.sqlite" } );
 const Event = sequelize.define( 'event',
@@ -18,44 +21,45 @@ const Event = sequelize.define( 'event',
     notes: { type: Sequelize.TEXT }
 } );
 
-app.use( bodyParser.urlencoded( { extended: true } ) );
-app.use( bodyParser.json( ) );
+router.use( bodyParser.urlencoded( { extended: true } ) );
+router.use( bodyParser.json( ) );
 
-app.use( express.static( "public" ) );
+router.use( express.static( "public" ) );
 
-app.get( "/api/all", ( req, res ) =>
-         {
-             Event.findAll( ).then( ( events ) => { res.json( events ); } );
-         } );
+router.get( "/api/all", ( req, res ) =>
+{
+    Event.findAll( ).then( ( events ) => { res.json( events ); } );
+} );
 
-app.post( "/api/new", ( req, res ) =>
-          {
-              Event.create( req.body ).then( ( event ) =>
-                                             {
-                                                 res.json( event );
-                                             } );
-          } );
+router.post( "/api/new", ( req, res ) =>
+{
+    Event.create( req.body ).then( ( event ) =>
+    {
+        res.json( event );
+    } );
+} );
 
-app.put( "/api/:id/update", ( req, res ) =>
-         {              
-             Event.update( req.body, { where: { id: req.params.id } } )
-                 .then( ( event ) =>
-                        {
-                            res.json( event );
-                        } );
-         } );
+router.put( "/api/:id/update", ( req, res ) =>
+{
+    Event.update( req.body, { where: { id: req.params.id } } )
+        .then( ( event ) =>
+        {
+            res.json( event );
+        } );
+} );
 
-app.delete( "/api/:id/delete", ( req, res ) =>
-            {              
-                Event.destroy( { where: { id: req.params.id } } )
-                    .then( ( event ) =>
-                           {
-                               res.json( event );
-                           } );
-            } );
+router.delete( "/api/:id/delete", ( req, res ) =>
+{
+    Event.destroy( { where: { id: req.params.id } } )
+        .then( ( event ) =>
+        {
+            res.json( event );
+        } );
+} );
 
 Event.sync( { } )
     .then( ( ) =>
-           {
-               app.listen( port );
-           } );
+    {
+	app.use( base_url, router );
+        app.listen( port );
+    } );

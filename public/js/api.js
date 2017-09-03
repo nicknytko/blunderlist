@@ -1,6 +1,6 @@
 function get_base_url( )
 {
-    return window.location.href.match( /http(?:s)?:\/\/(?:[^\/])+/ )[0];
+    return window.location.href.split("/").slice( 0, -1 ).join( "/" );
 }
 
 function ajax_request( method, url, data, cb )
@@ -11,15 +11,25 @@ function ajax_request( method, url, data, cb )
         {
             if ( req.readyState == 4 && cb != null )
             {
+		let resp = null;
+		
                 try
                 {
-                    let resp = JSON.parse( req.response );
-                    cb( JSON.parse( req.response ) );
+                    resp = JSON.parse( req.response );
                 }
                 catch ( exception )
                 {
-                    cb( { } );
+		    console.log( exception );
                 }
+
+		if ( resp )
+		{
+		    cb( resp );
+		}
+		else
+		{
+		    cb( { } );
+		}
             }
         };
     req.open( method, get_base_url( ) + url, true );
