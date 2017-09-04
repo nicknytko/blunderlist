@@ -3,6 +3,27 @@ const list_link = '<a href="#!" class="list-group-item list-group-item-action" i
 var events = [];
 var cur_event = -1;
 
+function format_datetime( date )
+{
+    function pad( num )
+    {
+	if ( num < 10 )
+	{
+	    return '0' + num;
+	}
+	else
+	{
+	    return num;
+	}
+    }
+
+    return date.getFullYear( ) + '-' +
+	pad( date.getMonth( ) - 1 ) + '-' +
+	pad( date.getDate( ) ) + 'T' +
+	pad( date.getHours( ) ) + ':' +
+	pad( date.getMinutes( ) );
+}
+
 /** Reload the event list and create the dom elements */
 
 function reload_list( cb )
@@ -127,7 +148,8 @@ function load_event_form( )
         
         if ( event.due_date )
         {
-            $( "#task_form_duedate" ).val( event.due_date.toLocaleString( ) );
+            // $( "#task_form_duedate" ).val( event.due_date.toLocaleString( ) );
+	    $( "#task_form_duedate" ).val( format_datetime( event.due_date ) );
         }
         else
         {
@@ -138,7 +160,8 @@ function load_event_form( )
 
         if ( event.reserve_date )
         {
-            $( "#task_form_reservedate" ).val( event.reserve_date.toLocaleString( ) );
+            // $( "#task_form_reservedate" ).val( event.reserve_date.toLocaleString( ) );
+	    $( "#task_form_reservedate" ).val( format_datetime( event.reserve_date ) );
         }
         else
         {
