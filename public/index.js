@@ -177,9 +177,9 @@ function save_event_form( cb )
     {
         $( "#task_form_update_btn" ).addClass( "disabled" );
         
-        let due_date = $( "#task_form_duedate" ).val( )
-        let reserve_date = $( "#task_form_reservedate" ).val( );
-        let valid_dates = true;
+        var due_date = $( "#task_form_duedate" ).val( )
+        var reserve_date = $( "#task_form_reservedate" ).val( );
+        var valid_dates = true;
         
         if ( due_date.length > 0 &&
              isNaN( Date.parse( due_date ) ) )
@@ -201,7 +201,7 @@ function save_event_form( cb )
 
         if ( valid_dates )
         {
-            let event = { };
+            var event = { };
 
             event.event_type = $( "#task_form_type" ).val( );
             event.title = $( "#task_form_title" ).val( );
