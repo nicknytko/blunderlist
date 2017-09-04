@@ -35,8 +35,6 @@ function reload_list( cb )
             }
         }
 
-	console.log( items );
-	
         items.sort( function( a, b )
 		    {
 			var dateA = ( a && a.date ? a.date.valueOf( ) : 0 );
@@ -78,7 +76,13 @@ function add_dom_event( label, date, id, parent )
 function select_item( val )
 {
     $( "[id^=task_]" ).removeClass( "active" );
+    
+    $( "#task_form_invalid_duedate" ).addClass( "hidden" );
+    $( "#task_form_duedate" ).removeClass( "invalid" );
 
+    $( "#task_form_invalid_reservedate" ).addClass( "hidden" );
+    $( "#task_form_reservedate" ).removeClass( "invalid" );
+    
     if ( cur_event != val && val != -1 )
     {
         cur_event = val;
@@ -171,21 +175,57 @@ function save_event_form( cb )
 {
     if ( cur_event != -1 )
     {
-        var event = { };
-
-        event.event_type = $( "#task_form_type" ).val( );
-        event.title = $( "#task_form_title" ).val( );
-        event.class_org = $( "#task_form_classorg" ).val( );
-        event.location = $( "#task_form_location" ).val( );
-        event.due_date = $( "#task_form_duedate" ).val( );
-        event.reserve = $( "#task_form_reserve" ).is( ':checked' );
-        event.reserve_date = $( "#task_form_reservedate" ).val( );
-        event.reserve_notes = $( "#task_form_reservenotes" ).val( );
-        event.notes = $( "#task_form_notes" ).val( );
-
-        // console.log( event );
+        $( "#task_form_update_btn" ).addClass( "disabled" );
         
-        api_update( cur_event, event, cb );
+        let due_date = $( "#task_form_duedate" ).val( )
+        let reserve_date = $( "#task_form_reservedate" ).val( );
+        let valid_dates = true;
+        
+        if ( due_date.length > 0 &&
+             isNaN( Date.parse( due_date ) ) )
+        {
+            valid_dates = false;
+            
+            $( "#task_form_duedate" ).addClass( "invalid" );
+            $( "#task_form_invalid_duedate" ).removeClass( "hidden" );
+        }
+
+        if ( reserve_date.length > 0 &&
+             isNaN( Date.parse( due_date ) ) )
+        {
+            valid_dates = false;
+
+            $( "#task_form_reservedate" ).addClass( "invalid" );
+            $( "#task_form_invalid_reservedate" ).removeClass( "hidden" );
+        }
+
+        if ( valid_dates )
+        {
+            let event = { };
+
+            event.event_type = $( "#task_form_type" ).val( );
+            event.title = $( "#task_form_title" ).val( );
+            event.class_org = $( "#task_form_classorg" ).val( );
+            event.location = $( "#task_form_location" ).val( );
+            event.due_date = $( "#task_form_duedate" ).val( );
+            event.reserve = $( "#task_form_reserve" ).is( ':checked' );
+            event.reserve_date = $( "#task_form_reservedate" ).val( );
+            event.reserve_notes = $( "#task_form_reservenotes" ).val( );
+            event.notes = $( "#task_form_notes" ).val( );
+
+            api_update( cur_event, event, function( data )
+            {
+                $( "#task_form_update_btn" )
+                    .removeClass( "disabled" );
+                
+                cb( data );
+            } );
+        }
+        else
+        {
+            $( "#task_form_update_btn" )
+                .removeClass( "disabled" );
+        }
     }
 }
 
@@ -219,17 +259,12 @@ $( document ).ready( function( )
     $( "#task_form_type" ).change( event_form_update_layout );
     
     $( "#task_form_update_btn" ).click( function( )
-    {
-        $( "#task_form_update_btn" ).addClass( "disabled" );
-        
+    {        
         save_event_form( function( data )
         {
-            $( "#task_form_update_btn" )
-                .removeClass( "disabled" );
-
             reload_list( );
-            cur_event = -1;
-            slide( 0 );
+
+            select_item( -1 );
         });
     } );
 
@@ -238,9 +273,10 @@ $( document ).ready( function( )
         api_delete( cur_event, null );
 
         reload_list( );
-        cur_event = -1;
-        slide( 0 );
+        select_item( -1 );
     } );
 
     $( "#task_form_back_btn" ).click( function( ){ select_item( -1 ); } );
+
+    api_version( function( data ){ $( "#version" ).html( "Git version: " + data.git_small ); } );
 } );

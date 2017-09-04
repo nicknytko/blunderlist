@@ -1,13 +1,18 @@
 var express = require( "express" ),
     Sequelize = require( "sequelize" ),
-    bodyParser = require( "body-parser" );
+    bodyParser = require( "body-parser" ),
+    config = require( "config" );
 var app = express( ),
-    port = process.env.PORT || 3000,
     router = express.Router( );
 
-const base_url = "/list";
-
-const sequelize = new Sequelize( "blunderlist-dev", null, null, { host: "localhost", dialect: "sqlite", storage: "db.sqlite" } );
+const sequelize = new Sequelize( config.get( "db.name" ),
+                                 config.get( "db.username" ),
+                                 config.get( "db.password" ),
+                                 {
+                                     host: config.get( "db.host" ),
+                                     dialect: config.get( "db.dialect" ),
+                                     storage: config.get( "db.sqlite_file" )
+                                 } );
 const Event = sequelize.define( 'event',
 {
     event_type: { allowNull: false, defaultValue: 0, type: Sequelize.INTEGER },
@@ -24,6 +29,65 @@ const Event = sequelize.define( 'event',
 router.use( bodyParser.urlencoded( { extended: true } ) );
 router.use( bodyParser.json( ) );
 
+var version = require( "child_process" )
+    .execSync( "git rev-parse HEAD" )
+    .toString( ).trim( );
+
+function sanitize_input( event )
+{
+    var return_event = { };
+
+    for ( key in event )
+    {
+        switch ( key )
+        {
+            case "event_type":
+            if ( event.event_type == 1 )
+            {
+                return_event.event_type = 1;
+            }
+            else
+            {
+                return_event.event_type = 0;
+            }
+            break;
+            
+            case "title":
+            case "class_org":
+            case "location":
+            case "reserve_notes":
+            case "notes":
+            return_event[key] = event[key]
+            break;
+
+            case "reserve":
+            if ( event.reserve == true )
+            {
+                return_event.reserve = true;
+            }
+            else
+            {
+                return_event.reserve = false;
+            }
+            break;
+            
+            case "due_date":
+            case "reserve_date":
+            {
+                let date = Date.parse( event[key] );
+
+                if ( date != NaN )
+                {
+                    return_event[key] = new Date( event[key] );
+                }
+            }
+            break;
+        }
+    }
+
+    return return_event;
+}
+
 router.use( express.static( "public" ) );
 
 router.get( "/api/all", ( req, res ) =>
@@ -33,15 +97,39 @@ router.get( "/api/all", ( req, res ) =>
 
 router.post( "/api/new", ( req, res ) =>
 {
-    Event.create( req.body ).then( ( event ) =>
+    let input = sanitize_input( req.body );
+    
+    Event.create( input ).then( ( event ) =>
     {
         res.json( event );
     } );
 } );
 
+router.get( "/api/version", ( req, res ) =>
+{
+    console.log( version );
+    res.json(
+        {
+            "git": version,
+            "git_small": version.slice( 0, 7 )
+        } );
+} );
+
+
+router.get( "/api/:id/", ( req, res ) =>
+{
+    Event.findOne( { where: { id: req.params.id } } )
+        .then( ( event ) =>
+        {
+            res.json( event );
+        } );
+} );
+
 router.put( "/api/:id/update", ( req, res ) =>
 {
-    Event.update( req.body, { where: { id: req.params.id } } )
+    let input = sanitize_input( req.body );
+                
+    Event.update( input, { where: { id: req.params.id } } )
         .then( ( event ) =>
         {
             res.json( event );
@@ -60,6 +148,6 @@ router.delete( "/api/:id/delete", ( req, res ) =>
 Event.sync( { } )
     .then( ( ) =>
     {
-	app.use( base_url, router );
-        app.listen( port );
+	app.use( config.get( "server.base_url" ), router );
+        app.listen( config.get( "server.port" ) );
     } );

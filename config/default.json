@@ -1,0 +1,14 @@
+{
+    "db": {
+        "name": "blunderlist-dev",
+        "host": "localhost",
+        "username": null,
+        "password": null,
+        "dialect": "sqlite",
+        "sqlite_file": "db.sqlite"
+    },
+    "server": {
+        "port": 3000,
+        "base_url": "/"
+    }
+}

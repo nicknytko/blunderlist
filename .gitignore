@@ -1,3 +1,6 @@
 db.sqlite
 node_modules
 .DS_Store
+
+config/*
+!config/default.json

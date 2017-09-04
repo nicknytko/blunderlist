@@ -61,6 +61,11 @@ function api_update( id, data, cb )
                   data, cb );
 }
 
+function api_version( cb )
+{
+    ajax_request( "get", "/api/version", null, cb );
+}
+
 function api_delete( id, cb )
 {
     ajax_request( "delete", "/api/" + id.toString( ) + "/delete", cb );
