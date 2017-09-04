@@ -7,13 +7,13 @@ var cur_event = -1;
 
 function reload_list( cb )
 {
-    api_all( ( data ) =>
+    api_all( function( data ) 
     {
         $( "#tasks_list" ).empty( );
         events = [];
         var items = [];
         
-        for ( let i=0; i < data.length; i++ )
+        for ( var i=0; i < data.length; i++ )
         {
             events[data[i].id] = data[i];
 
@@ -37,15 +37,15 @@ function reload_list( cb )
 
 	console.log( items );
 	
-        items.sort( ( a, b ) =>
+        items.sort( function( a, b )
 		    {
-			let dateA = ( a && a.date ? a.date.valueOf( ) : 0 );
-			let dateB = ( b && b.date ? b.date.valueOf( ) : 0 );
+			var dateA = ( a && a.date ? a.date.valueOf( ) : 0 );
+			var dateB = ( b && b.date ? b.date.valueOf( ) : 0 );
 			
 			return dateA - dateB;
 		    } );
         
-        for ( let i=0; i < items.length; i++ )
+        for ( var i=0; i < items.length; i++ )
         {
             add_dom_event( items[i].title, items[i].date, items[i].id, items[i].parent );
         }
@@ -59,9 +59,9 @@ function reload_list( cb )
 
 function add_dom_event( label, date, id, parent )
 {
-    let date_str = date ?
+    var date_str = date ?
                  date.toLocaleDateString( ) : "";
-    let icon = ( events[id].event_type == 0 ? "calendar" : "file-text" );
+    var icon = ( events[id].event_type == 0 ? "calendar" : "file-text" );
 
     if ( events[id].class_org &&
 	 events[id].class_org.match( /cs/i ) )
@@ -72,7 +72,7 @@ function add_dom_event( label, date, id, parent )
     $( "#tasks_list" )
         .append( list_link + "task_" + id + '"><div class="d-flex w-100 justify-content-between"><span><img src="icon/' + icon + '.svg"></img> ' + label + '</span><span>' + date_str + '</span></div></a>' )
     $( "#task_" + id )
-        .click( ( event ) => { select_item( id ); } );
+        .click( function( event ) { select_item( id ); } );
 }
 
 function select_item( val )
@@ -103,7 +103,7 @@ function select_item( val )
 
         if ( screen.width < 512 )
         {
-            setTimeout( ( ) => { $( "#top" ).show( ); }, 150 );
+            setTimeout( function( ){ $( "#top" ).show( ); }, 150 );
         }
     }
 }
@@ -114,7 +114,7 @@ function load_event_form( )
 {
     if ( cur_event != -1 )
     {
-        let event = events[cur_event];
+        var event = events[cur_event];
 
         $( "#task_form_type" ).val( event.event_type );
         $( "#task_form_title" ).val( event.title );
@@ -171,7 +171,7 @@ function save_event_form( cb )
 {
     if ( cur_event != -1 )
     {
-        let event = { };
+        var event = { };
 
         event.event_type = $( "#task_form_type" ).val( );
         event.title = $( "#task_form_title" ).val( );
@@ -193,12 +193,12 @@ function save_event_form( cb )
 
 function send_new_task( )
 {
-    let data = { title: $( "#tasks_new" ).val( ) };
+    var data = { title: $( "#tasks_new" ).val( ) };
 
-    api_new( data, ( data ) =>
+    api_new( data, function( data )
     {
         $( "#tasks_new" )[0].value = "";
-        reload_list( ( ) => { select_item( data.id ); } );
+        reload_list( function( ){ select_item( data.id ); } );
     } );
 }
 
@@ -208,21 +208,21 @@ function slide( percent )
     $( "#slide" ).css( "width", percent.toString( ) + '%' )
 }
 
-$( document ).ready( ( ) =>
+$( document ).ready( function( )
 {
     reload_list( );
-    $( "#tasks_new" ).on( 'keypress', ( e ) =>
+    $( "#tasks_new" ).on( 'keypress', function( e )
     {
         if ( e.which == 13 ){ send_new_task( ); }
     } );
 
     $( "#task_form_type" ).change( event_form_update_layout );
     
-    $( "#task_form_update_btn" ).click( ( ) =>
+    $( "#task_form_update_btn" ).click( function( )
     {
         $( "#task_form_update_btn" ).addClass( "disabled" );
         
-        save_event_form( ( data ) =>
+        save_event_form( function( data )
         {
             $( "#task_form_update_btn" )
                 .removeClass( "disabled" );
@@ -233,7 +233,7 @@ $( document ).ready( ( ) =>
         });
     } );
 
-    $( "#task_form_delete_btn" ).click( ( ) =>
+    $( "#task_form_delete_btn" ).click( function( )
     {
         api_delete( cur_event, null );
 
@@ -242,5 +242,5 @@ $( document ).ready( ( ) =>
         slide( 0 );
     } );
 
-    $( "#task_form_back_btn" ).click( ( ) => { select_item( -1 ); } );
+    $( "#task_form_back_btn" ).click( function( ){ select_item( -1 ); } );
 } );

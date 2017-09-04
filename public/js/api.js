@@ -7,11 +7,11 @@ function ajax_request( method, url, data, cb )
 {
     var req = new XMLHttpRequest( );
     
-    req.onreadystatechange = ( ) =>
+    req.onreadystatechange = function( )
         {
             if ( req.readyState == 4 && cb != null )
             {
-		let resp = null;
+		var resp = null;
 		
                 try
                 {
