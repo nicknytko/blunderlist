@@ -24,6 +24,11 @@ function format_datetime( date )
 	pad( date.getMinutes( ) );
 }
 
+function is_mobile( )
+{
+    return screen.width < 512;
+}
+
 /** Reload the event list and create the dom elements */
 
 function reload_list( cb )
@@ -106,15 +111,14 @@ function select_item( val )
     
     if ( cur_event != val && val != -1 )
     {
-        cur_event = val;
         $( "#task_" + val ).addClass( "active" );
-        
+
+        cur_event = val;
         load_event_form( );
 
-        if ( screen.width < 512 )
+        if ( is_mobile( ) )
         {
             slide( 100 );
-            $( "#top" ).hide( );
         }
         else
         {
@@ -125,11 +129,6 @@ function select_item( val )
     {
         cur_event = -1;
         slide( 0 );
-
-        if ( screen.width < 512 )
-        {
-            setTimeout( function( ){ $( "#top" ).show( ); }, 150 );
-        }
     }
 }
 
@@ -267,7 +266,11 @@ function send_new_task( )
 
 function slide( percent )
 {
-    $( "#top" ).css( "width", ( 100 - percent ).toString( ) + '%' )
+    if ( !is_mobile( ) )
+    {
+        $( "#top" ).css( "width", ( 100 - percent ).toString( ) + '%' )
+    }
+    
     $( "#slide" ).css( "width", percent.toString( ) + '%' )
 }
 
