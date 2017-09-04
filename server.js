@@ -107,7 +107,6 @@ router.post( "/api/new", ( req, res ) =>
 
 router.get( "/api/version", ( req, res ) =>
 {
-    console.log( version );
     res.json(
         {
             "git": version,
