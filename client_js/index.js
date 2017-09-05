@@ -1,4 +1,4 @@
-const list_link = '<a href="#!" class="list-group-item list-group-item-action" id="';
+var list_link = '<a href="#!" class="list-group-item list-group-item-action" id="';
 
 var events = [];
 var cur_event = -1;

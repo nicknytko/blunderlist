@@ -1,7 +1,9 @@
 var express = require( "express" ),
     Sequelize = require( "sequelize" ),
     bodyParser = require( "body-parser" ),
-    config = require( "config" );
+    config = require( "config" ),
+    uglify_js = require( "uglify-js" ),
+    fs = require( "fs" );
 var app = express( ),
     router = express.Router( );
 
@@ -144,9 +146,56 @@ router.delete( "/api/:id/delete", ( req, res ) =>
         } );
 } );
 
-Event.sync( { } )
-    .then( ( ) =>
+function js_minify( )
+{
+    var client_files = fs.readdirSync( "client_js" );
+    var code = { };
+
+    client_files.forEach( ( file ) =>
     {
-	app.use( config.get( "server.base_url" ), router );
-        app.listen( config.get( "server.port" ) );
+        code[file] = fs.readFileSync( "client_js/" + file, "utf8" );
     } );
+
+    var result = uglify_js.minify( code );
+    fs.writeFileSync( "public/js/blunderlist.min.js", result.code );
+
+    return result;
+}
+
+if ( process.argv.length == 2 ||
+     ( process.argv.length == 3 &&
+       process.argv[2].match( /serve/i ) ) )
+{
+    Event.sync( { } )
+        .then( ( ) =>
+         {
+             js_minify( );
+             
+	     app.use( config.get( "server.base_url" ), router );
+             app.listen( config.get( "server.port" ) );
+         } );
+}
+else if ( process.argv.length == 3 )
+{
+    switch ( process.argv[2] )
+    {
+        case "minify":
+        {
+            var result = js_minify( );
+
+            if ( result.error != undefined )
+            {
+                console.log( "Minify error: " + result.error );
+            }
+            else
+            {
+                console.log( "Minified successfully to \"public/js/blunderlist.min.js\"" );
+            }
+        }
+        break;
+        
+        default:
+        console.log( "Unknown command \"" + process.argv[2] + "\"" );
+        break;
+    }
+}
