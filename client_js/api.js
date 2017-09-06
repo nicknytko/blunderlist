@@ -8,30 +8,30 @@ function ajax_request( method, url, data, cb )
     var req = new XMLHttpRequest( );
     
     req.onreadystatechange = function( )
+    {
+        if ( req.readyState == 4 && cb != null )
         {
-            if ( req.readyState == 4 && cb != null )
+	    var resp = null;
+	    
+            try
             {
-		var resp = null;
-		
-                try
-                {
-                    resp = JSON.parse( req.response );
-                }
-                catch ( exception )
-                {
-		    console.log( exception );
-                }
-
-		if ( resp )
-		{
-		    cb( resp );
-		}
-		else
-		{
-		    cb( { } );
-		}
+                resp = JSON.parse( req.response );
             }
-        };
+            catch ( exception )
+            {
+		console.log( exception );
+            }
+            
+	    if ( resp )
+	    {
+		cb( resp );
+	    }
+	    else
+	    {
+		cb( { } );
+	    }
+        }
+    };
     req.open( method, get_base_url( ) + url, true );
     req.setRequestHeader( "Content-Type", "application/json;charset=UTF-8" );
     
@@ -68,5 +68,5 @@ function api_version( cb )
 
 function api_delete( id, cb )
 {
-    ajax_request( "delete", "/api/" + id.toString( ) + "/delete", cb );
+    ajax_request( "delete", "/api/" + id.toString( ) + "/delete", null, cb );
 }

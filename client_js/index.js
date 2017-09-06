@@ -21,7 +21,39 @@ function format_datetime( date )
 	pad( date.getMonth( ) + 1 ) + '-' +
 	pad( date.getDate( ) ) + 'T' +
 	pad( date.getHours( ) ) + ':' +
-	pad( date.getMinutes( ) );
+	pad( date.getMinutes( ) ) + ':' +
+        pad( date.getSeconds( ) );
+}
+
+function format_time( date )
+{
+    function pad( num )
+    {
+	if ( num < 10 )
+	{
+	    return '0' + num;
+	}
+	else
+	{
+	    return num;
+	}
+    }
+
+    if ( date.getHours( ) > 12 )
+    {
+        return ( date.getHours( ) - 12 ).toString( ) + ":" + pad( date.getMinutes( ) ) + " PM";
+    }
+    else
+    {
+        var hour = date.getHours( );
+        
+        if ( hour == 0 )
+        {
+            hour = 12;
+        }
+
+        return date.getHours.toString( ) + ":" + pad( date.getMinutes( ) ) + " AM";
+    }
 }
 
 function is_mobile( )
@@ -35,7 +67,16 @@ function reload_list( cb )
 {
     api_all( function( data ) 
     {
-        $( "#tasks_list" ).empty( );
+        /* Clear and hide all list parents */
+                 
+        $( "#tasks_list_undefined" ).empty( );
+        $( "#tasks_list_today" ).empty( );
+        $( "#tasks_list_week" ).empty( );
+
+        $( "#tasks_list_undefined_outer" ).hide( );
+        $( "#tasks_list_today_outer" ).hide( );
+        $( "#tasks_list_week_outer" ).hide( );
+        
         events = [];
         var items = [];
         
@@ -53,25 +94,45 @@ function reload_list( cb )
                 data[i].reserve_date = new Date( data[i].reserve_date );
             }
             
-            items.push( { title: data[i].title, date: data[i].due_date, id: data[i].id, parent: "tasks_lists" } );
+            items.push( { title: data[i].title, date: data[i].due_date, id: data[i].id } );
             
             if ( data[i].reserve && data[i].reserve_date )
             {
-                items.push( { title: "RSVP for \"" + data[i].title + "\"", date: data[i].due_date, id: data[i].id, parent: "tasks_lists" } );
+                items.push( { title: "RSVP for \"" + data[i].title + "\"", date: data[i].due_date, id: data[i].id } );
             }
         }
 
         items.sort( function( a, b )
-		    {
-			var dateA = ( a && a.date ? a.date.valueOf( ) : 0 );
-			var dateB = ( b && b.date ? b.date.valueOf( ) : 0 );
-			
-			return dateA - dateB;
-		    } );
+        {
+	    var dateA = ( a && a.date ? a.date.valueOf( ) : 0 );
+	    var dateB = ( b && b.date ? b.date.valueOf( ) : 0 );
+	    
+	    return dateA - dateB;
+	} );
+
+        var today = new Date( );
         
         for ( var i=0; i < items.length; i++ )
         {
-            add_dom_event( items[i].title, items[i].date, items[i].id, items[i].parent );
+            var parent = "#tasks_list_week";
+            var show_time = false;
+
+            if ( items[i].date &&
+                 today.getMonth( ) == items[i].date.getMonth( ) &&
+                 today.getYear( ) == items[i].date.getYear( ) &&
+                 today.getDate( ) == items[i].date.getDate( ) )
+            {
+                parent = "#tasks_list_today";
+                show_time = true;
+            }
+            else if ( items[i].date == null ||
+                      ( items[i].date != null &&
+                        items[i].date.getTime( ) < today.getTime( ) ) )
+            {
+                parent = "#tasks_list_undefined";
+            }
+
+            add_dom_event( items[i].title, items[i].date, items[i].id, parent, show_time );
         }
 
         if ( cb != null )
@@ -81,10 +142,10 @@ function reload_list( cb )
     } );
 }
 
-function add_dom_event( label, date, id, parent )
+function add_dom_event( label, date, id, parent, show_time )
 {
     var date_str = date ?
-                 date.toLocaleDateString( ) : "";
+        ( show_time ? format_time( date ) : date.toLocaleDateString( ) ) : "";
     var icon = ( events[id].event_type == 0 ? "calendar" : "file-text" );
 
     if ( events[id].class_org &&
@@ -92,8 +153,10 @@ function add_dom_event( label, date, id, parent )
     {
         icon = "file-code";
     }
+
+    $( parent + "_outer" ).show( );
     
-    $( "#tasks_list" )
+    $( parent )
         .append( list_link + "task_" + id + '"><div class="d-flex w-100 justify-content-between"><span><img src="icon/' + icon + '.svg"></img> ' + label + '</span><span>' + date_str + '</span></div></a>' )
     $( "#task_" + id )
         .click( function( event ) { select_item( id ); } );
@@ -147,7 +210,6 @@ function load_event_form( )
         
         if ( event.due_date )
         {
-            // $( "#task_form_duedate" ).val( event.due_date.toLocaleString( ) );
 	    $( "#task_form_duedate" ).val( format_datetime( event.due_date ) );
         }
         else
@@ -159,7 +221,6 @@ function load_event_form( )
 
         if ( event.reserve_date )
         {
-            // $( "#task_form_reservedate" ).val( event.reserve_date.toLocaleString( ) );
 	    $( "#task_form_reservedate" ).val( format_datetime( event.reserve_date ) );
         }
         else
@@ -289,17 +350,17 @@ $( document ).ready( function( )
         save_event_form( function( data )
         {
             reload_list( );
-
             select_item( -1 );
         });
     } );
 
     $( "#task_form_delete_btn" ).click( function( )
     {
-        api_delete( cur_event, null );
-
-        reload_list( );
-        select_item( -1 );
+        api_delete( cur_event, function( )
+        {
+            reload_list( );
+            select_item( -1 );
+        } );
     } );
 
     $( "#task_form_back_btn" ).click( function( ){ select_item( -1 ); } );
