@@ -98,7 +98,7 @@ function reload_list( cb )
             
             if ( data[i].reserve && data[i].reserve_date )
             {
-                items.push( { title: "RSVP for \"" + data[i].title + "\"", date: data[i].due_date, id: data[i].id } );
+                items.push( { title: "RSVP for \"" + data[i].title + "\"", date: data[i].reserve_date, id: data[i].id } );
             }
         }
 
@@ -125,12 +125,17 @@ function reload_list( cb )
                 parent = "#tasks_list_today";
                 show_time = true;
             }
-            else if ( items[i].date == null ||
-                      ( items[i].date != null &&
-                        items[i].date.getTime( ) < today.getTime( ) ) )
+            else if ( items[i].date == null )
             {
                 parent = "#tasks_list_undefined";
             }
+	    else if ( items[i].date != null &&
+                      items[i].date.getTime( ) < today.getTime( ) )
+	    {
+		parent = "#tasks_list_undefined";
+		show_time = true;
+	    }
+
 
             add_dom_event( items[i].title, items[i].date, items[i].id, parent, show_time );
         }
@@ -142,23 +147,31 @@ function reload_list( cb )
     } );
 }
 
+var dom = 0;
+
 function add_dom_event( label, date, id, parent, show_time )
 {
     var date_str = date ?
         ( show_time ? format_time( date ) : date.toLocaleDateString( ) ) : "";
     var icon = ( events[id].event_type == 0 ? "calendar" : "file-text" );
-
+    var name = "task_" + id + "_" + ( dom++ ).toString( )
+    
     if ( events[id].class_org &&
 	 events[id].class_org.match( /cs/i ) )
     {
         icon = "file-code";
     }
 
+    if ( label.match( /rsvp/i ) )
+    {
+        icon = "checklist";
+    }
+
     $( parent + "_outer" ).show( );
     
     $( parent )
-        .append( list_link + "task_" + id + '"><div class="d-flex w-100 justify-content-between"><span><img src="icon/' + icon + '.svg"></img> ' + label + '</span><span>' + date_str + '</span></div></a>' )
-    $( "#task_" + id )
+        .append( list_link + name + '"><div class="d-flex w-100 justify-content-between"><span><img src="icon/' + icon + '.svg"></img> ' + label + '</span><span>' + date_str + '</span></div></a>' )
+    $( "#" + name )
         .click( function( event ) { select_item( id ); } );
 }
 
@@ -174,7 +187,7 @@ function select_item( val )
     
     if ( cur_event != val && val != -1 )
     {
-        $( "#task_" + val ).addClass( "active" );
+        $( "[id^=task_" + val + "]" ).addClass( "active" );
 
         cur_event = val;
         load_event_form( );
