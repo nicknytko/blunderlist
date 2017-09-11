@@ -52,7 +52,7 @@ function format_time( date )
             hour = 12;
         }
 
-        return date.getHours.toString( ) + ":" + pad( date.getMinutes( ) ) + " AM";
+        return hour.toString( ) + ":" + pad( date.getMinutes( ) ) + " AM";
     }
 }
 
@@ -187,7 +187,7 @@ function select_item( val )
     
     if ( cur_event != val && val != -1 )
     {
-        $( "[id^=task_" + val + "]" ).addClass( "active" );
+        $( "[id^=task_" + val + "_]" ).addClass( "active" );
 
         cur_event = val;
         load_event_form( );
