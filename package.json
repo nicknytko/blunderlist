@@ -9,11 +9,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.17.2",
-    "config": "^1.26.2",
-    "express": "^4.15.4",
-    "sequelize": "^4.8.0",
-    "sqlite3": "^3.1.9",
-    "uglify-js": "^3.0.28"
+    "body-parser": "^1.20.2",
+    "config": "^3.3.9",
+    "express": "^4.18.2",
+    "sequelize": "^6.32.1",
+    "sqlite3": "^5.1.6",
+    "uglify-js": "^3.17.4"
+  },
+  "devDependencies": {
+    "prettier": "3.0.3"
   }
 }
